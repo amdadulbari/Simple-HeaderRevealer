@@ -13,12 +13,16 @@ def catch_all(path):
         body = request.data.decode('utf-8')
     else:
         body = request.form if request.form else {}
+    
+    # Collect query parameters
+    params = {key: value for key, value in request.args.items()}
 
     # Construct the response
     response = {
         'path': path,
         'method': request.method,
         'headers': headers,
+        'params': params,
         'body': body
     }
 
@@ -27,4 +31,3 @@ def catch_all(path):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
