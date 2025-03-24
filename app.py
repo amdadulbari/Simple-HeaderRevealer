@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+import json
+import sys
 
 app = Flask(__name__)
 
@@ -9,13 +11,10 @@ def catch_all(path):
     headers = {key: value for key, value in request.headers.items()}
     
     # Get the raw body for non-form data
-    if request.data:
-        body = request.data.decode('utf-8')
-    else:
-        body = request.form if request.form else {}
+    body = request.data.decode('utf-8') if request.data else request.form.to_dict()
     
     # Collect query parameters
-    params = {key: value for key, value in request.args.items()}
+    params = request.args.to_dict()
 
     # Construct the response
     response = {
@@ -26,8 +25,10 @@ def catch_all(path):
         'body': body
     }
 
-    # Return the response as JSON
+    # Log response to stdout
+    print(json.dumps(response, indent=2), file=sys.stdout)
+
     return jsonify(response), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
