@@ -2,7 +2,27 @@ from flask import Flask, request, jsonify
 import json
 import sys
 
+
+from flask_sock import Sock
+import time
+import datetime
+
 app = Flask(__name__)
+sock = Sock(app)
+
+@app.route('/stream')
+def stream():
+    def event_stream():
+        while True:
+            yield f"data: {datetime.datetime.now().isoformat()}\n\n"
+            time.sleep(1)
+    return app.response_class(event_stream(), mimetype='text/event-stream')
+
+@sock.route('/ws')
+def websocket(ws):
+    while True:
+        data = ws.receive()
+        ws.send(data)
 
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
